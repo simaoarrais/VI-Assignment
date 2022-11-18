@@ -4,7 +4,7 @@ var videos_file_entry = new Array();
 var videos_title = new Array();
 var videos_id = new Array();
 var videos_published = new Array();
-var videos_caregory = new Array();
+var videos_keyword = new Array();
 var videos_likes = new Array();
 var videos_comments = new Array();
 var videos_views = new Array();
@@ -16,7 +16,7 @@ async function parseData(file) {
     videos_title.push(data["Title"]);
     videos_id.push(data["Video ID"]);
     videos_published.push(data["Published At"]);
-    videos_caregory.push(data["Keyword"]);
+    videos_keyword.push(data["Keyword"]);
     videos_likes.push(data["Likes"]);
     videos_comments.push(data["Comments"]);
     videos_views.push(data["Views"]);
@@ -39,34 +39,68 @@ async function createTops() {
     table_header.innerText = i;
     table_row.appendChild(table_header);
 
-    // Create Table Cells - Category
-    var table_cell = document.createElement('td');
+    // Get index of sorted video
     var video_index = videos_views.indexOf(sorted_views.at(-i));
-    table_cell.innerText = capitalizeFirstLetter(videos_caregory[video_index]);
-    table_row.appendChild(table_cell);
 
-    // Create Table Cells - Views
-    var table_cell = document.createElement('td');
-    var video_index = videos_views.indexOf(sorted_views.at(-i));
-    table_cell.innerText = capitalizeFirstLetter(videos_views[video_index]);
-    table_row.appendChild(table_cell);
-
-    // Create Table Cells - Likes
-    var table_cell = document.createElement('td');
-    var video_index = videos_views.indexOf(sorted_views.at(-i));
-    table_cell.innerText = capitalizeFirstLetter(videos_likes[video_index]);
-    table_row.appendChild(table_cell);
+    // Create Table Cells
+    addCellToTable(table_row, videos_title[video_index]); // Title
+    addCellToTable(table_row, videos_keyword[video_index]); // Category
+    addCellToTable(table_row, Math.trunc(videos_views[video_index]));  // Views
+    addCellToTable(table_row, Math.trunc(videos_likes[video_index]));  // Likes
+    addCellToTable(table_row, Math.trunc(videos_comments[video_index])); // Comments
+    addCellToTable(table_row, videos_published[video_index]);  // Date
   }
+  
+  drawPieChart()
+}
+
+function addCellToTable (table_row, info) {
+  var table_cell = document.createElement('td');
+  table_cell.innerText = info;
+  table_row.appendChild(table_cell);
 }
 
 function capitalizeFirstLetter (string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function drawPieChart() {
+
+  // Create the data table.
+	var data = new google.visualization.DataTable();
+
+  // First column
+	data.addColumn('string', 'Keyword');
+
+	// Second column
+	data.addColumn('number', 'Category of Videos');
+
+	data.addRows([
+				['Tech', 79],
+				['Music', 112],
+				['Apple', 68],
+        ['History', 83]
+	]);
+
+	// Set chart configuration options
+	var options = {
+		title : 'Category Pie Chart',
+		is3D: false
+	};
+
+	// Instantiate the pie chart.
+	var chart = new google.visualization.PieChart( document.getElementById('pie-chart-row') );
+	debugger;
+	// Draw the chart, passing in some configuration options.
+	chart.draw(data, options);
+}
+
 // Init
 async function init() {
   await parseData(file_path);
   createTops();
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback( drawPieChart );
 }
 
 init();
