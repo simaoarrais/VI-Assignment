@@ -10,10 +10,17 @@ var videos_likes = new Array();
 var videos_comments = new Array();
 var videos_views = new Array();
 
+let mapCategories_Views = new Map();
+let mapCategories_Likes = new Map();
+let mapCategories_Comments = new Map();
+
+let mapCategories_Stats = new Map();
+
+let sum_categories_views = new Map();
 
 // Iterate through the CSV file and save data
 async function parseData(file) {
-  await d3.csv(file, function(data) {
+  await d3.csv(file, function (data) {
     videos_file_entry.push(data[""]);
     videos_title.push(data["Title"]);
     videos_id.push(data["Video ID"]);
@@ -24,6 +31,34 @@ async function parseData(file) {
     videos_views.push(data["Views"]);
     videos_keyword_unique = [...new Set(videos_keyword)];
 
+    
+
+    if (mapCategories_Views.has(data["Keyword"])) {
+      mapCategories_Views.set(
+        data["Keyword"],
+        mapCategories_Views.get(data["Keyword"]) + parseInt(data["Views"])
+      );
+    } else {
+      mapCategories_Views.set(data["Keyword"], parseInt(data["Views"]));
+    }
+
+    if (mapCategories_Likes.has(data["Keyword"])) {
+      mapCategories_Likes.set(
+        data["Keyword"],
+        mapCategories_Likes.get(data["Keyword"]) + parseInt(data["Likes"])
+      );
+    } else {
+      mapCategories_Likes.set(data["Keyword"], parseInt(data["Likes"]));
+    }
+
+    if (mapCategories_Comments.has(data["Keyword"])) {
+      mapCategories_Comments.set(
+        data["Keyword"],
+        mapCategories_Comments.get(data["Keyword"]) + parseInt(data["Comments"])
+      );
+    } else {
+      mapCategories_Comments.set(data["Keyword"], parseInt(data["Comments"]));
+    }
   });
 }
 
@@ -38,6 +73,7 @@ async function createTops() {
   /* --------------------- Create Table and add data to it -------------------- */
   var tops_table = document.getElementById("tops-table-body");
   for (var i = 1; i <= 10; i++) {
+    // Create Table Rows and Headers
     var table_row = tops_table.insertRow();
     var table_header = document.createElement('th');
     table_header.scope = "row";
@@ -73,64 +109,89 @@ function addCellToTable (table_row, info) {
   table_row.appendChild(table_cell);
 }
 
-function capitalizeFirstLetter (string) {
+function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function barPlotCategories() {
+
   // set the dimensions and margins of the graph
-  var margin = {top: 30, right: 30, bottom: 70, left: 60},
-      width = 460 - margin.left - margin.right,
-      height = 400 - margin.top - margin.bottom;
+  const margin = {top: 30, right: 60, bottom: 70, left: 70},
+  width = 600 - margin.left - margin.right,
+  height = 500 - margin.top - margin.bottom;
+
 
   // append the svg object to the body of the page
-  var svg = d3.select("#barPlotCategories")
+  var svg = d3
+    .select("#barPlotCategories")
     .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
     .append("g")
-      .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Parse the Data
-  d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv", function(data) {
+  dataViews = Array.from(mapCategories_Views, ([name, value]) => ({
+    name,
+    value,
+  }));
+  dataLikes = Array.from(mapCategories_Likes, ([name, value]) => ({
+    name,
+    value,
+  }));
 
-    // sort data
-    data.sort(function(b, a) {
-      return a.Value - b.Value;
-    });
+/*   dataComments = Array.from(mapCategories_Comments, ([name, value]) => ({
+    name,
+    value,
+  })); */
 
-    // X axis
-    var x = d3.scaleBand()
-      .range([ 0, width ])
-      .domain(data.map(function(d) { return d.Country; }))
-      .padding(0.2);
-    svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x))
-      .selectAll("text")
-        .attr("transform", "translate(-10,0)rotate(-45)")
-        .style("text-anchor", "end");
+  var selectedCategory = document.getElementById("mySelect").value;
+  console.log("selectedCategory", selectedCategory);
 
-    // Add Y axis
-    var y = d3.scaleLinear()
-      .domain([0, 13000])
-      .range([ height, 0]);
-    svg.append("g")
-      .call(d3.axisLeft(y));
+  data_views = mapCategories_Views.get(selectedCategory);
+  data_likes = mapCategories_Likes.get(selectedCategory);
+  //data_comments = mapCategories_Comments.get(selectedCategory);
 
-    // Bars
-    svg.selectAll("mybar")
-      .data(data)
-      .enter()
-      .append("rect")
-        .attr("x", function(d) { return x(d.Country); })
-        .attr("y", function(d) { return y(d.Value); })
-        .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - y(d.Value); })
-        .attr("fill", "#69b3a2")
+  //var data = [['Views',data_views], ['Likes',data_likes], ['Comments',data_comments]];
+   var data = [['Views',data_views], ['Likes',data_likes]];
 
-  })
+  max_value = Math.max(data_views, data_likes);
+  console.log("MAX VALUE", max_value);
+  console.log("DATA", data[0][0], data[1], data[2]);
+
+  // sort data
+  data.sort(function(b, a) {
+    return a.Value - b.Value;
+  });
+
+  // X axis
+  const x = d3.scaleBand()
+    .range([ 0, width ])
+    .domain(data.map(d => d[0]))
+    .padding(0.2);
+  svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+      .attr("transform", "translate(-10,0)rotate(-45)")
+      .style("text-anchor", "end");
+  
+  // Add Y axis
+  const y = d3.scaleLinear()
+    .domain([0, max_value+1000])
+    .range([ height, 0]);
+  svg.append("g")
+    .call(d3.axisLeft(y));
+  
+  // Bars
+  svg.selectAll("mybar")
+    .data(data)
+    .join("rect")
+      .attr("x", d => x(d[0]))
+      .attr("y", d => y(d[1]))
+      .attr("width", x.bandwidth())
+      .attr("height", d => height - y(d[1]))
+      .attr("fill", "#01A5EE")
+  
 }
 
 function drawPieChart(pie_chart_dict) {
@@ -141,10 +202,12 @@ function drawPieChart(pie_chart_dict) {
 	data.addColumn('string', 'Keyword');
 	data.addColumn('number', 'Category of Videos');
 
-  /* ----------------------------- Add table rows ----------------------------- */
-  for (let [key, value] of Object.entries(pie_chart_dict)) {
-    data.addRow([key, value]);
-  }
+	data.addRows([
+				['Tech', 79],
+				['Music', 112],
+				['Apple', 68],
+        ['History', 83]
+	]);
 
 	/* --------------------- Set chart configuration options -------------------- */
 	var options = {
@@ -159,7 +222,7 @@ function drawPieChart(pie_chart_dict) {
 }
 
 function addOptionsDropdown (options) {
-  // console.log("INIT")
+  console.log("INIT")
   var myDiv = document.getElementById("divCategories");
 
   //Create array of options to be added
@@ -169,20 +232,36 @@ function addOptionsDropdown (options) {
   myDiv.appendChild(selectList);
 
 
-  // console.log("Adding Options to Dropdown");
-  // console.log("Options", options);
+  console.log("Adding Options to Dropdown");
+  console.log("Options", options);
   for (var i = 0; i < options.length; i++) {
     var option = document.createElement("option");
     option.setAttribute("value", options[i]);
     option.text = options[i];
     selectList.appendChild(option);
   }
+
+  var categories_list = document.getElementById("mySelect");
+
+  categories_list.addEventListener("click", function() {
+    console.log("CLICKED");
+    console.log("selectedCategory", categories_list.value);
+    d3.select("svg").remove();
+    barPlotCategories();
+  });
+
+}
+
+function capitalizeWords(arr) {
+  return arr.map(element => {
+    return element.charAt(0).toUpperCase() + element.slice(1).toLowerCase();
+  });
 }
 
 // Init
 async function init() {
   await parseData(file_path);
-  // console.log("Im here")
+  console.log("Im here")
   createTops();
   addOptionsDropdown(videos_keyword_unique);
   barPlotCategories();
