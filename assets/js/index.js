@@ -11,6 +11,15 @@ var videos_comments = new Array();
 var videos_views = new Array();
 
 
+let mapCategories_Views = new Map();
+let mapCategories_Likes = new Map();
+let mapCategories_Comments = new Map();
+
+let mapCategories_Stats = new Map();
+
+
+let sum_categories_views = new Map();
+
 // Iterate through the CSV file and save data
 async function parseData(file) {
   await d3.csv(file, function(data) {
@@ -22,7 +31,28 @@ async function parseData(file) {
     videos_likes.push(data["Likes"]);
     videos_comments.push(data["Comments"]);
     videos_views.push(data["Views"]);
-    videos_keyword_unique = [...new Set(videos_keyword)];
+    videos_keyword_unique = [...new Set(videos_keyword)]
+
+    if (mapCategories_Views.has(data["Keyword"])) {
+      mapCategories_Views.set(data["Keyword"], mapCategories_Views.get(data["Keyword"]) + parseInt(data["Views"]));
+    }
+    else {
+      mapCategories_Views.set(data["Keyword"], parseInt(data["Views"]));
+    }
+
+    if (mapCategories_Likes.has(data["Keyword"])) {
+      mapCategories_Likes.set(data["Keyword"], mapCategories_Likes.get(data["Keyword"]) + parseInt(data["Likes"]));
+    }
+    else {
+      mapCategories_Likes.set(data["Keyword"], parseInt(data["Likes"]));
+    }
+
+    if (mapCategories_Comments.has(data["Keyword"])) {
+      mapCategories_Comments.set(data["Keyword"], mapCategories_Comments.get(data["Keyword"]) + parseInt(data["Comments"]));
+    }
+    else {
+      mapCategories_Comments.set(data["Keyword"], parseInt(data["Comments"]));
+    }
 
   });
 }
@@ -55,7 +85,7 @@ async function createTops() {
     addCellToTable(table_row, videos_published[video_index]);  // Date
   }
   
-  drawPieChart()
+  //drawPieChart()
 }
 
 function addCellToTable (table_row, info) {
@@ -70,6 +100,9 @@ function capitalizeFirstLetter (string) {
 }
 
 function barPlotCategories() {
+  console.log("Creating Bar Plot");
+
+  
 
 // set the dimensions and margins of the graph
 var margin = {top: 30, right: 30, bottom: 70, left: 60},
@@ -85,52 +118,44 @@ var svg = d3.select("#barPlotCategories")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
-// Parse the Data
-d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv", function(data) {
+  dataViews = Array.from(mapCategories_Views, ([name, value]) => ({name, value}));
+  dataLikes = Array.from(mapCategories_Likes, ([name, value]) => ({name, value}));
+  dataComments = Array.from(mapCategories_Comments, ([name, value]) => ({name, value}));
 
-  // sort data
-  data.sort(function(b, a) {
-    return a.Value - b.Value;
-  });
+  var selectedCategory = document.getElementById("mySelect").value;
+  console.log("selectedCategory", selectedCategory);
 
-  // X axis
-  var x = d3.scaleBand()
-    .range([ 0, width ])
-    .domain(data.map(function(d) { return d.Country; }))
-    .padding(0.2);
-  svg.append("g")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x))
-    .selectAll("text")
-      .attr("transform", "translate(-10,0)rotate(-45)")
-      .style("text-anchor", "end");
-
-  // Add Y axis
-  var y = d3.scaleLinear()
-    .domain([0, 13000])
-    .range([ height, 0]);
-  svg.append("g")
-    .call(d3.axisLeft(y));
+  data_views = mapCategories_Views.get(selectedCategory);
+  data_likes = mapCategories_Likes.get(selectedCategory);
+  data_comments = mapCategories_Comments.get(selectedCategory);
+  var data = [data_views, data_likes, data_comments];
+  console.log("DATA",data)
 
   // Bars
-  svg.selectAll("mybar")
-    .data(data)
-    .enter()
-    .append("rect")
-      .attr("x", function(d) { return x(d.Country); })
-      .attr("y", function(d) { return y(d.Value); })
-      .attr("width", x.bandwidth())
-      .attr("height", function(d) { return height - y(d.Value); })
-      .attr("fill", "#69b3a2")
-
-})
 
 
-
-
-
+  svg.selectAll("rect")
+      .data(data)
+      .join("rect")
+         .attr("x", function (d, i) {
+            console.log("x",i * (width / data.length) + (width / data.length)/2);
+                  return i * (width / data.length) + (width / data.length)/2;
+          })
+          .attr("y", function (d) {
+            console.log( "y",height - (d * 4) + 15); 
+            return height - (d * 4) + 15; // padding
+          })
+          .attr("height" , function (d) {
+            console.log( "height",(d * 4) + 15);
+            return (d * 4) + 15; // padding
+        })
+        .attr("width" , function (d) {
+          console.log( "width",width / data.length - 1);
+            return (width / data.length - 1)
+      });
+      
 }
-function drawPieChart() {
+/*function drawPieChart() {
 
   // Create the data table.
 	var data = new google.visualization.DataTable();
@@ -159,10 +184,9 @@ function drawPieChart() {
 	debugger;
 	// Draw the chart, passing in some configuration options.
 	chart.draw(data, options);
-}
+}*/
 
 function addOptionsDropdown (options) {
-  console.log("INIT")
   var myDiv = document.getElementById("divCategories");
 
   //Create array of options to be added
@@ -173,7 +197,6 @@ function addOptionsDropdown (options) {
 
 
   console.log("Adding Options to Dropdown");
-  console.log("Options", options);
   for (var i = 0; i < options.length; i++) {
     var option = document.createElement("option");
     option.setAttribute("value", options[i]);
@@ -185,10 +208,9 @@ function addOptionsDropdown (options) {
 // Init
 async function init() {
   await parseData(file_path);
-  console.log("Im here")
   createTops();
   google.charts.load('current', {'packages':['corechart']});
-  google.charts.setOnLoadCallback( drawPieChart );
+  //google.charts.setOnLoadCallback( drawPieChart );
   addOptionsDropdown(videos_keyword_unique);
   barPlotCategories();
   addCellToTable() ; //problemas com esta funcao
