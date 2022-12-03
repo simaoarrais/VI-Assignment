@@ -75,6 +75,7 @@ async function createTops() {
     // Create Table Rows and Headers
     var table_row = tops_table.insertRow();
     var table_header = document.createElement("th");
+
     table_header.scope = "row";
     table_header.innerText = i;
     table_row.appendChild(table_header);
@@ -89,6 +90,8 @@ async function createTops() {
     addCellToTable(table_row, Math.trunc(videos_likes[video_index])); // Likes
     addCellToTable(table_row, Math.trunc(videos_comments[video_index])); // Comments
     addCellToTable(table_row, videos_published[video_index]); // Date
+
+   
 
     /* -------------------- Get keywords and counter of tops -------------------- */
     keyword = videos_keyword[video_index];
@@ -110,6 +113,43 @@ function addCellToTable(table_row, info) {
   var table_cell = document.createElement("td");
   table_cell.innerText = info;
   table_row.appendChild(table_cell);
+}
+
+function redirectingFromTableToYoutube() {
+  var table = document.getElementById("tops-table-body");
+  var rows = table.getElementsByTagName("tr");
+
+ 
+  for (i = 0; i < rows.length; i++) {
+
+    var currentRow = table.rows[i];
+
+    var createOverHandler = function (row) {
+      return function () {
+        row.style.color = "#FF2F5F";   };
+    };
+
+    var createOutHandler = function (row) {
+      return function () {
+        row.style.color = 'black';   };
+    };
+
+
+    var createClickHandler = function(row) {
+      return function() {
+        var cell = row.getElementsByTagName("td")[0];
+        var video_title = cell.innerHTML;
+        video_id = videos_id[videos_title.indexOf(video_title)];
+        window.open('https://www.youtube.com/watch?v=' + video_id);
+      };
+    };
+
+    currentRow.onclick = createClickHandler(currentRow);
+    currentRow.onmouseover = createOverHandler(currentRow);
+    currentRow.onmouseout = createOutHandler(currentRow);
+
+  }
+  
 }
 
 
@@ -355,7 +395,9 @@ async function init() {
   addOptionsDropdown(videos_keyword_unique);
   barPlotCategories();
   wordCloud();
+  redirectingFromTableToYoutube();
   addCellToTable(); //problemas com esta funcao
+
 }
 
 init();
