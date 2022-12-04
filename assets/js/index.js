@@ -193,7 +193,7 @@ function barPlotAllCategories(data){
         .on("mouseover", function(d, i) {
           tooltip.html(` ${d.target.__data__.value}`).style("visibility", "visible");
           d3.select(this)
-            .attr("fill", shadeColor(bar_color, -15));
+            .attr("fill", "#0047aa");
         })
         .on("mousemove", function(){
           tooltip
@@ -253,6 +253,17 @@ function barPlotAllCategories(data){
 // Build the Bar Chart
 function barPlotCategories() {
 
+  const tooltip = d3.select("body")
+  .append("div")
+  .attr("class","d3-tooltip")
+  .style("position", "absolute")
+  .style("z-index", "10")
+  .style("visibility", "hidden")
+  .style("padding", "15px")
+  .style("background", "rgba(0,0,0,0.6)")
+  .style("border-radius", "5px")
+  .style("color", "#fff")
+  .text("a simple tooltip");
 
   // set the dimensions and margins of the graph
   const margin = { top: 30, right: 60, bottom: 70, left: 70 },
@@ -267,8 +278,19 @@ function barPlotCategories() {
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+    .attr("transform", `translate(${margin.left},${margin.top})`)
+    .on("mouseover", function(d, i) {
+      tooltip.html(` ${d.target.__data__.name}`).style("visibility", "visible");
 
+    })
+    .on("mousemove", function(){
+      tooltip
+        .style("top", (event.pageY-10)+"px")
+        .style("left",(event.pageX+10)+"px");
+    })
+    .on("mouseout", function() {
+      tooltip.html(``).style("visibility", "hidden");
+    });
 
   var selectedCategory = document.getElementById("mySelect").value;
 
