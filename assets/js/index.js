@@ -156,21 +156,15 @@ function redirectingFromTableToYoutube() {
 function barPlotAllCategories(data){
   const div = document.getElementById('divAllCategories');
   if (div.childNodes.length !== 0) {
-    console.log("removing this bitch")
     div.removeChild(div.childNodes[0]);
   }
 
   if (data == "views") {
-    console.log("VISUALIZACOES")
     data =  dataViews.filter (function (d) {  return d.value > 90000000});
     
   } else if (data == "likes") {
-    console.log("LIKES")
     data =  dataLikes.filter (function (d) {  return d.value > 2905600; })
   }
-  
-  console.log("DATA",data)
-  console.log("FILTERED",data)
 
   const tooltip = d3.select("body")
   .append("div")
@@ -197,7 +191,6 @@ function barPlotAllCategories(data){
     .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`)
         .on("mouseover", function(d, i) {
-          console.log(d)
           tooltip.html(` ${d.target.__data__.value}`).style("visibility", "visible");
           d3.select(this)
             .attr("fill", shadeColor(bar_color, -15));
@@ -260,7 +253,7 @@ function barPlotAllCategories(data){
 // Build the Bar Chart
 function barPlotCategories() {
 
-  console.log("barPlotCategories");
+
   // set the dimensions and margins of the graph
   const margin = { top: 30, right: 60, bottom: 70, left: 70 },
     width = 500 - margin.left - margin.right,
@@ -355,8 +348,8 @@ function drawPieChart(pie_chart_dict) {
 
 // Adding categories to the dropdown menu
 function addOptionsDropdown(options) {
-  console.log("INIT");
 
+  
   var myDiv = document.getElementById("divCategories");
 
   //Create array of options to be added
