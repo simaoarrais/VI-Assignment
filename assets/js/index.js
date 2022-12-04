@@ -74,57 +74,85 @@ async function parseData(file) {
       id = data["Video ID"], 
       published_date = data["Published At"], 
       keyword = data.Keyword,
-      likes = data.Likes,
-      comments = data.Comments,
-      views = data.Views
+      likes = parseInt(data.Likes),
+      comments = parseInt(data.Comments),
+      views = parseInt(data.Views)
     );
   });
 }
 
 // Build Top Videos Tab
 async function createTops() {
-  var pie_chart_dict = {};
+  /* -------------- Sort and map the videos by views - descending ------------- */
+  var sorted_videos = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
+  sorted_videos = sorted_videos.slice(0,10).map(function (e) { return mapVideos[e] });
 
-  /* ----------------- Clone the video views array and sort it ---------------- */
-  var sorted_views = videos_views.map(function (e) {return e;});
-  sorted_views.sort(function (a, b) {return a - b;});
-
-  /* --------------------- Create Table and add data to it -------------------- */
-  var tops_table = document.getElementById("tops-table-body");
-  for (var i = 1; i <= 10; i++) {
-    // Create Table Rows and Headers
-    var table_row = tops_table.insertRow();
-    var table_header = document.createElement("th");
-
-    table_header.scope = "row";
-    table_header.innerText = i;
-    table_row.appendChild(table_header);
-
-    /* ------------------------ Get index of sorted video ----------------------- */
-    var video_index = videos_views.indexOf(sorted_views.at(-i));
-
-    /* --------------------------- Create Table Cells --------------------------- */
-    addCellToTable(table_row, videos_title[video_index]); // Title
-    addCellToTable(table_row, videos_keyword[video_index]); // Category
-    addCellToTable(table_row, Math.trunc(videos_views[video_index])); // Views
-    addCellToTable(table_row, Math.trunc(videos_likes[video_index])); // Likes
-    addCellToTable(table_row, Math.trunc(videos_comments[video_index])); // Comments
-    addCellToTable(table_row, videos_published[video_index]); // Date
-
-   
-
-    /* -------------------- Get keywords and counter of tops -------------------- */
-    keyword = videos_keyword[video_index];
-    if (keyword in pie_chart_dict) {
-      pie_chart_dict[keyword] += 1;
-    } else {
-      pie_chart_dict[keyword] = 1;
-    }
-  }
+  /* ------------------------- Create top videos table ------------------------ */
+  createTopsTable(sorted_videos);
 
   /* --------------------------- Draw the pie chart --------------------------- */
   google.charts.load("current", { packages: ["corechart"] });
-  google.charts.setOnLoadCallback(function () { drawPieChart(pie_chart_dict); });
+  google.charts.setOnLoadCallback(function () { drawPieChart(sorted_videos); });
+}
+
+function createTopsTable(sorted_videos) {
+  var tops_table = document.getElementById("tops-table-body");
+  for (var i = 0; i < 10; i++) {
+    /* ---------------------- Create Table Rows and Headers --------------------- */
+    var table_row = tops_table.insertRow();
+    var table_header = document.createElement("th");
+    table_header.scope = "row";
+    table_header.innerText = i + 1;
+    table_row.appendChild(table_header);
+
+    var video = sorted_videos[i]
+
+    /* --------------------------- Create Table Cells --------------------------- */
+    addCellToTable(table_row, video.title); // Title
+    addCellToTable(table_row, video.keyword); // Category
+    addCellToTable(table_row, video.views); // Views
+    addCellToTable(table_row, video.likes); // Likes
+    addCellToTable(table_row, video.comments); // Comments
+    addCellToTable(table_row, video.published_date); // Date
+  }
+}
+
+function drawPieChart(sorted_videos) {
+
+  /* ---------- Get all keywords and count the number of appearences ---------- */
+  pie_chart_dict = {};
+  for (const video of Object.values(sorted_videos)) {
+    if (video.keyword in pie_chart_dict) {
+      pie_chart_dict[video.keyword] += 1;
+    }
+    else { 
+      pie_chart_dict[video.keyword] = 1; 
+    }
+  }
+
+  /* ------------------------- Create the data table. ------------------------- */
+  var data = new google.visualization.DataTable();
+
+  /* ----------------------- Add first and second column ---------------------- */
+  data.addColumn("string", "Keyword");
+  data.addColumn("number", "Number of Appearences");
+
+  /* ----------------------------- Add table rows ----------------------------- */
+  for (let [keyword, counter] of Object.entries(pie_chart_dict)) {
+    data.addRow([keyword, counter]);
+  }
+
+  /* --------------------- Set chart configuration options -------------------- */
+  var options = {
+    title: "Category Pie Chart",
+    is3D: false,
+  };
+
+  /* ------------------- Instantiate and draw the pie chart ------------------- */
+  var chart = new google.visualization.PieChart(
+    document.getElementById("pie-chart-row")
+  );
+  chart.draw(data, options);
 }
 
 function addCellToTable(table_row, info) {
@@ -170,10 +198,9 @@ function redirectingFromTableToYoutube() {
   
 }
 
-
 // Build the Bar Chart
 function barPlotCategories() {
-  console.log("barPlotCategories");
+  // console.log("barPlotCategories");
   // set the dimensions and margins of the graph
   const margin = { top: 30, right: 60, bottom: 70, left: 70 },
     width = 600 - margin.left - margin.right,
@@ -237,36 +264,9 @@ function barPlotCategories() {
     .attr("fill", "#01A5EE");
 }
 
-function drawPieChart(pie_chart_dict) {
-  /* ------------------------- Create the data table. ------------------------- */
-  var data = new google.visualization.DataTable();
-
-  /* ----------------------- Add first and second column ---------------------- */
-  data.addColumn("string", "Keyword");
-  data.addColumn("number", "Category of Videos");
-
-  /* ----------------------------- Add table rows ----------------------------- */
-  for (let [key, value] of Object.entries(pie_chart_dict)) {
-    data.addRow([key, value]);
-  }
-
-  /* --------------------- Set chart configuration options -------------------- */
-  var options = {
-    title: "Category Pie Chart",
-    is3D: false,
-  };
-
-  /* ------------------- Instantiate and draw the pie chart ------------------- */
-  var chart = new google.visualization.PieChart(
-    document.getElementById("pie-chart-row")
-  );
-  debugger;
-  chart.draw(data, options);
-}
-
 // Adding categories to the dropdown menu
 function addOptionsDropdown(options) {
-  console.log("INIT");
+  // console.log("INIT");
 
   var myDiv = document.getElementById("divCategories");
 
@@ -290,10 +290,6 @@ function addOptionsDropdown(options) {
     barPlotCategories();
   });
 }
-
-
-
-
 
 function wordCloud() {
   myWords = getWordCount(videos_keyword);
@@ -412,8 +408,6 @@ async function init() {
   barPlotCategories();
   wordCloud();
   redirectingFromTableToYoutube();
-  addCellToTable(); //problemas com esta funcao
-
 }
 
 init();
