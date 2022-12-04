@@ -152,14 +152,119 @@ function redirectingFromTableToYoutube() {
   
 }
 
+///////////// BAR CHART  all categories //////////////
+function barPlotAllCategories(data){
+  const div = document.getElementById('divAllCategories');
+  if (div.childNodes.length !== 0) {
+    console.log("removing this bitch")
+    div.removeChild(div.childNodes[0]);
+  }
+
+  if (data == "views") {
+    console.log("VISUALIZACOES")
+    data =  dataViews.filter (function (d) {  return d.value > 90000000});
+    
+  } else if (data == "likes") {
+    console.log("LIKES")
+    data =  dataLikes.filter (function (d) {  return d.value > 2905600; })
+  }
+  
+  console.log("DATA",data)
+  console.log("FILTERED",data)
+
+  const tooltip = d3.select("body")
+  .append("div")
+  .attr("class","d3-tooltip")
+  .style("position", "absolute")
+  .style("z-index", "10")
+  .style("visibility", "hidden")
+  .style("padding", "15px")
+  .style("background", "rgba(0,0,0,0.6)")
+  .style("border-radius", "5px")
+  .style("color", "#fff")
+  .text("a simple tooltip");
+
+  // set the dimensions and margins of the graph
+  const margin = {top: 30, right: 30, bottom: 70, left: 80},
+      width = 1280 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+  // append the svg object to the body of the page
+  const svg = d3.select("#divAllCategories")
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`)
+        .on("mouseover", function(d, i) {
+          console.log(d)
+          tooltip.html(` ${d.target.__data__.value}`).style("visibility", "visible");
+          d3.select(this)
+            .attr("fill", shadeColor(bar_color, -15));
+        })
+        .on("mousemove", function(){
+          tooltip
+            .style("top", (event.pageY-10)+"px")
+            .style("left",(event.pageX+10)+"px");
+        })
+        .on("mouseout", function() {
+          tooltip.html(``).style("visibility", "hidden");
+          d3.select(this).attr("fill", bar_color);
+        });
+
+
+  // Initialize the X axis
+  const x = d3.scaleBand()
+    .range([ 0, width ])
+    .padding(0.2);
+  const xAxis = svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+
+  // Initialize the Y axis
+  const y = d3.scaleLinear()
+    .range([ height, 0]);
+  const yAxis = svg.append("g")
+    .attr("class", "myYaxis")
+
+
+  // A function that create / update the plot for a given variable:
+
+    // Update the X axis
+    x.domain(data.map(d => d.name))
+    xAxis.call(d3.axisBottom(x))
+
+    // Update the Y axis
+    y.domain([0, d3.max(data, d => d.value) ]);
+    yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+    // Create the u variable
+    var u = svg.selectAll("rect")
+      .data(data)
+
+    u
+      .join("rect") // Add a new rect for each new elements
+      .transition()
+      .duration(1000)
+        .attr("x", d => x(d.name))
+        .attr("y", d => y(d.value))
+        .attr("width", x.bandwidth())
+        .attr("height", d => height - y(d.value))
+        .attr("fill", "#0B5ED7")
+
+
+  
+}
+
+// Initialize the plot with the first dataset
 
 // Build the Bar Chart
 function barPlotCategories() {
+
   console.log("barPlotCategories");
   // set the dimensions and margins of the graph
   const margin = { top: 30, right: 60, bottom: 70, left: 70 },
-    width = 600 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    width = 500 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   var svg = d3
@@ -258,6 +363,8 @@ function addOptionsDropdown(options) {
   //Create and append select list
   var selectList = document.createElement("select");
   selectList.setAttribute("id", "mySelect");
+  selectList.classList.add("form-select");
+
   myDiv.appendChild(selectList);
 
   for (var i = 0; i < options.length; i++) {
@@ -274,9 +381,6 @@ function addOptionsDropdown(options) {
     barPlotCategories();
   });
 }
-
-
-
 
 
 function wordCloud() {
@@ -300,7 +404,6 @@ function wordCloud() {
   var layout = d3.layout
     .cloud()
     .size([width, height])
-    
     .words(
       myWords.map(function (d) {
         return { text: d.word, size: d.size };
@@ -333,13 +436,14 @@ function wordCloud() {
       .style("font-size", function (d) {return d.size;})
       .style("fill", "#01A5EE")
       .attr("text-anchor", "middle")
-      .style("font-family", "sans-serif")
+      .style("font-family", "trebuchet MS")
       .attr("transform", function (d) {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";})
       .text(function(d) { return d.text; })
       .on("click", function (d){
         chosen_category = d["target"]["__data__"]["text"];
         changeOption(chosen_category);
+
     })
       .text(function (d) {
         return d.text;
@@ -361,6 +465,8 @@ function changeOption(option){
 // ################################# DATA PROCESSING #################################
 
 function preparingData() { // Preparing data for the bar plot
+  //Removing irrelevant data
+  
   dataViews = Array.from(mapCategories_Views, ([name, value]) => ({
     name,
     value,
@@ -369,6 +475,7 @@ function preparingData() { // Preparing data for the bar plot
     name,
     value,
   }));
+  return [dataViews, dataLikes];
 }
 // Getting word count of categories
 function getWordCount(words) {
@@ -396,6 +503,7 @@ async function init() {
   barPlotCategories();
   wordCloud();
   redirectingFromTableToYoutube();
+  barPlotAllCategories("views");
   addCellToTable(); //problemas com esta funcao
 
 }

@@ -61,6 +61,7 @@ https://templatemo.com/tm-562-space-dynamic
             <ul class="nav">
               <li class="scroll-to-section"><a href="#top" class="active">Home</a></li>
               <li class="scroll-to-section"><a href="#about">About us</a></li>
+              <li class="scroll-to-section"><a href="#allCategories">All Categories</a></li>
               <li class="scroll-to-section"><a href="#categories">By Category</a></li>
               <li class="scroll-to-section"><a href="#tops">Hits</a></li>
               <li class="scroll-to-section"><a href="#overtime">Overtime</a></li>
@@ -159,23 +160,45 @@ https://templatemo.com/tm-562-space-dynamic
       </div>
     </div>
   </div>
+
+  <div id="allCategories" class="our-portfolio section">
+    <div class="container">
+      <h2>Compare all categories </h2>
+      <p> Here you are able to compare the statistics of the main categories of Youtube's videos</p>
+      <!-- Add 2 buttons -->
+      <button  class="btn btn-primary" style="margin-right:2%"onclick="barPlotAllCategories('views')">Views</button>
+      <button  class="btn btn-primary" onclick="barPlotAllCategories('likes')">Likes</button>
+      <br>
+      <!-- Create a div where the graph will take place -->
+      <div class="row">
+        <div class="col-lg-12 col-sm-6">
+          <div class="item wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.4s">
+            <div id="divAllCategories" class="">
+            </div>
+          </div>
+      </div>
+
+        
+      </div>
+    </div>
+  </div>
+
   <div id="categories" class="our-portfolio section">
     <div class="container">
       <h2>Check by category </h2>
 
       <div class="row">
         <div class="col-lg-8 ">
-          If you want to check the statistics of a specific category, please select it from the list below:
+          If you want to check the statistics of a specific category, please select it from the WordCloud below or directly from the dropdown menu.
           <div class="section-heading  wow bounceIn mb-3" data-wow-duration="0.5s" data-wow-delay="0.2s" >
           </div>
         </div>
-      <div id="my_dataviz"></div>
+      <div id="my_dataviz"></div>  
       </div>
       
       <div class="row">
         <div class="col-lg-2 col-sm-6">
             <div id="divCategories" class="item wow bounceInUp" data-wow-duration="1s" data-wow-delay="0.3s" >
-
             </div>
         </div>
         <div class="col-lg-10 col-sm-6">
@@ -189,6 +212,7 @@ https://templatemo.com/tm-562-space-dynamic
       </div>
     </div>
   </div>
+
 
 
   <div id="tops" class="our-services section">
