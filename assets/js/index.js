@@ -121,7 +121,7 @@ function drawPieChart(sorted_videos) {
 
   /* ---------- Get all keywords and count the number of appearences ---------- */
   pie_chart_dict = {};
-  for (const video of Object.values(sorted_videos)) {
+  for (let video of Object.values(sorted_videos)) {
     if (video.keyword in pie_chart_dict) {
       pie_chart_dict[video.keyword] += 1;
     }
