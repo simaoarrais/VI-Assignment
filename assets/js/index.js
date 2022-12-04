@@ -14,6 +14,20 @@ let mapCategories_Views = new Map();
 let mapCategories_Likes = new Map();
 let mapCategories_Comments = new Map();
 
+let mapVideos = new Map()
+
+class VideoStructure {
+  constructor(title, id, published_date, keyword, likes, comments, views) {
+    this.title = title;
+    this.id = id;
+    this.published_date = published_date;
+    this.keyword = keyword;
+    this.likes = likes;
+    this.comments = comments;
+    this.views = views;
+  }
+}
+
 
 // Iterate through the CSV file and save data
 async function parseData(file) {
@@ -54,6 +68,16 @@ async function parseData(file) {
     } else {
       mapCategories_Comments.set(data["Keyword"], parseInt(data["Comments"]));
     }
+
+    mapVideos[data[""]] = new VideoStructure (
+      title = data.Title, 
+      id = data["Video ID"], 
+      published_date = data["Published At"], 
+      keyword = data.Keyword,
+      likes = data.Likes,
+      comments = data.Comments,
+      views = data.Views
+    );
   });
 }
 
@@ -62,12 +86,8 @@ async function createTops() {
   var pie_chart_dict = {};
 
   /* ----------------- Clone the video views array and sort it ---------------- */
-  var sorted_views = videos_views.map(function (e) {
-    return e;
-  });
-  sorted_views.sort(function (a, b) {
-    return a - b;
-  });
+  var sorted_views = videos_views.map(function (e) {return e;});
+  sorted_views.sort(function (a, b) {return a - b;});
 
   /* --------------------- Create Table and add data to it -------------------- */
   var tops_table = document.getElementById("tops-table-body");
@@ -104,9 +124,7 @@ async function createTops() {
 
   /* --------------------------- Draw the pie chart --------------------------- */
   google.charts.load("current", { packages: ["corechart"] });
-  google.charts.setOnLoadCallback(function () {
-    drawPieChart(pie_chart_dict);
-  });
+  google.charts.setOnLoadCallback(function () { drawPieChart(pie_chart_dict); });
 }
 
 function addCellToTable(table_row, info) {
@@ -227,12 +245,10 @@ function drawPieChart(pie_chart_dict) {
   data.addColumn("string", "Keyword");
   data.addColumn("number", "Category of Videos");
 
-  data.addRows([
-    ["Tech", 79],
-    ["Music", 112],
-    ["Apple", 68],
-    ["History", 83],
-  ]);
+  /* ----------------------------- Add table rows ----------------------------- */
+  for (let [key, value] of Object.entries(pie_chart_dict)) {
+    data.addRow([key, value]);
+  }
 
   /* --------------------- Set chart configuration options -------------------- */
   var options = {
