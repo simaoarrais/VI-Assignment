@@ -80,14 +80,16 @@ async function parseData(file) {
   });
 }
 
+
 // Build Top Videos Tab
 async function createTops() {
   /* -------------- Sort and map the videos by views - descending ------------- */
-  var sorted_videos = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
+  let sorted_videos = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
   sorted_videos = sorted_videos.slice(0,10).map(function (e) { return mapVideos[e] });
 
   /* ------------------------- Create top videos table ------------------------ */
   createTopsTable(sorted_videos);
+  createTopsOptions();
 
   /* --------------------------- Draw the pie chart --------------------------- */
   google.charts.load("current", { packages: ["corechart"] });
@@ -95,16 +97,17 @@ async function createTops() {
 }
 
 function createTopsTable(sorted_videos) {
-  var tops_table = document.getElementById("tops-table-body");
-  for (var i = 0; i < 10; i++) {
+  const tops_table_div = document.getElementById("tops-table-body");
+
+  for (let i = 0; i < 10; i++) {
     /* ---------------------- Create Table Rows and Headers --------------------- */
-    var table_row = tops_table.insertRow();
-    var table_header = document.createElement("th");
+    const table_row = tops_table_div.insertRow();
+    const table_header = document.createElement("th");
     table_header.scope = "row";
     table_header.innerText = i + 1;
     table_row.appendChild(table_header);
 
-    var video = sorted_videos[i]
+    const video = sorted_videos[i]
 
     /* --------------------------- Create Table Cells --------------------------- */
     addCellToTable(table_row, video.title); // Title
@@ -113,8 +116,63 @@ function createTopsTable(sorted_videos) {
     addCellToTable(table_row, video.likes); // Likes
     addCellToTable(table_row, video.comments); // Comments
     addCellToTable(table_row, video.published_date); // Date
-  }
+  };
+  redirectingFromTableToYoutube();
 }
+
+
+function createTopsOptions() {
+  const tops_select = document.getElementById("tops-select");
+
+  /* ---------------------------- Create ALL option --------------------------- */
+  let option = document.createElement("option");
+  option.text = "ALL";
+  option.value = "ALL";
+  tops_select.appendChild(option);
+
+  /* ---------------------- Create the remaining options ---------------------- */
+  for (let keyword of videos_keyword_unique.sort()) {
+    const option = document.createElement("option");
+    option.text = keyword;
+    option.value = keyword;
+    tops_select.appendChild(option);
+  }
+
+  /* ---------------------------- Onclick an option --------------------------- */
+  tops_select.onclick = function() {
+    let sorted_videos;
+
+    /* ---------------------- If the value selected is ALL ---------------------- */
+    if (tops_select.value == "ALL") {
+      /* -------------- Sort and map the videos by views - descending ------------- */
+      sorted_videos = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
+      sorted_videos = sorted_videos.slice(0,10).map(function (e) { return mapVideos[e] });
+    }
+
+    /* ------------------ In case of another option was chosen ------------------ */
+    else {
+      const points_dict = {};
+      /* ------------ Get all videos category that match the chosen one ----------- */
+      for (let [key, elem] of Object.entries(mapVideos)) {
+        if (elem.keyword == tops_select.value) {
+          if (!points_dict[key]) {
+            points_dict[key] = elem;
+          }
+        }
+      }
+      /* -------------- Sort and map the videos by views - descending ------------- */
+      sorted_videos = Object.keys(points_dict).sort((a, b) => points_dict[b].views - points_dict[a].views);
+      sorted_videos = sorted_videos.slice(0,10).map(function (e) { return points_dict[e] });
+    }
+
+    /* --------- Remove all contents from tops table and add new content -------- */
+    d3.select("#tops-table-body")
+    .html('')
+    .selectAll("*")
+    .remove(); 
+    createTopsTable(sorted_videos);
+    };
+} 
 
 function drawPieChart(sorted_videos) {
 
@@ -154,11 +212,13 @@ function drawPieChart(sorted_videos) {
   chart.draw(data, options);
 }
 
+
 function addCellToTable(table_row, info) {
   var table_cell = document.createElement("td");
   table_cell.innerText = info;
   table_row.appendChild(table_cell);
 }
+
 
 function redirectingFromTableToYoutube() {
   var table = document.getElementById("tops-table-body");
@@ -179,7 +239,6 @@ function redirectingFromTableToYoutube() {
         row.style.color = 'black';   };
     };
 
-
     var createClickHandler = function(row) {
       return function() {
         var cell = row.getElementsByTagName("td")[0];
@@ -196,6 +255,7 @@ function redirectingFromTableToYoutube() {
   }
   
 }
+
 
 ///////////// BAR CHART  all categories //////////////
 function barPlotAllCategories(data){
@@ -293,6 +353,7 @@ function barPlotAllCategories(data){
   
 }
 
+
 // Initialize the plot with the first dataset
 
 // Build the Bar Chart
@@ -383,6 +444,7 @@ function barPlotCategories() {
     .attr("height", (d) => height - y(d[1]))
     .attr("fill", "#01A5EE");
 }
+
 
 // Adding categories to the dropdown menu
 function addOptionsDropdown(options) {
@@ -484,6 +546,7 @@ function wordCloud() {
 
 }
 
+
 function changeOption(option){
   var select = document.getElementById("mySelect");
   select.value = option;
@@ -494,7 +557,6 @@ function changeOption(option){
 
 
 // ################################# DATA PROCESSING #################################
-
 function preparingData() { // Preparing data for the bar plot
   //Removing irrelevant data
   
@@ -508,6 +570,8 @@ function preparingData() { // Preparing data for the bar plot
   }));
   return [dataViews, dataLikes];
 }
+
+
 // Getting word count of categories
 function getWordCount(words) {
   let map = new Map();
@@ -523,8 +587,6 @@ function getWordCount(words) {
   return res;
 }
 
-
-
 // Init
 async function init() {
   await parseData(file_path);
@@ -533,9 +595,7 @@ async function init() {
   addOptionsDropdown(videos_keyword_unique);
   barPlotCategories();
   wordCloud();
-  redirectingFromTableToYoutube();
   barPlotAllCategories("views");
-  addCellToTable(); //problemas com esta funcao
 
 }
 
