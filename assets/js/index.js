@@ -88,18 +88,48 @@ async function createTops() {
   sorted_videos = sorted_videos.slice(0,10).map(function (e) { return mapVideos[e] });
 
   /* ------------------------- Create top videos table ------------------------ */
-  createTopsTable(sorted_videos);
   createTopsOptions();
+  createTopsTable(10);
 
   /* --------------------------- Draw the pie chart --------------------------- */
   google.charts.load("current", { packages: ["corechart"] });
   google.charts.setOnLoadCallback(function () { drawPieChart(sorted_videos); });
 }
 
-function createTopsTable(sorted_videos) {
-  const tops_table_div = document.getElementById("tops-table-body");
+function createTopsTable(num) {
+  /* --------- Remove all contents from tops table and add new content -------- */
+  d3.select("#tops-table-body")
+  .html('')
+  .selectAll("*")
+  .remove(); 
 
-  for (let i = 0; i < 10; i++) {
+  const tops_select = document.getElementById("tops-select");
+  let sorted_videos;
+    /* ---------------------- If the value selected is ALL ---------------------- */
+    if (tops_select.value == "ALL") {
+      /* -------------- Sort and map the videos by views - descending ------------- */
+      sorted_videos = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
+      sorted_videos = sorted_videos.slice(0,num).map(function (e) { return mapVideos[e] });
+    }
+    /* ------------------ In case of another option was chosen ------------------ */
+    else {
+      const points_dict = {};
+      /* ------------ Get all videos category that match the chosen one ----------- */
+      for (let [key, elem] of Object.entries(mapVideos)) {
+        if (elem.keyword == tops_select.value) {
+          if (!points_dict[key]) {
+            points_dict[key] = elem;
+          }
+        }
+      }
+      /* -------------- Sort and map the videos by views - descending ------------- */
+      sorted_videos = Object.keys(points_dict).sort((a, b) => points_dict[b].views - points_dict[a].views);
+      sorted_videos = sorted_videos.slice(0,num).map(function (e) { return points_dict[e] });
+    }
+
+
+  const tops_table_div = document.getElementById("tops-table-body");
+  for (let i = 0; i < num; i++) {
     /* ---------------------- Create Table Rows and Headers --------------------- */
     const table_row = tops_table_div.insertRow();
     const table_header = document.createElement("th");
@@ -132,7 +162,7 @@ function createTopsOptions() {
 
   /* ---------------------- Create the remaining options ---------------------- */
   for (let keyword of videos_keyword_unique.sort()) {
-    const option = document.createElement("option");
+    let option = document.createElement("option");
     option.text = keyword;
     option.value = keyword;
     tops_select.appendChild(option);
@@ -140,37 +170,7 @@ function createTopsOptions() {
 
   /* ---------------------------- Onclick an option --------------------------- */
   tops_select.onclick = function() {
-    let sorted_videos;
-
-    /* ---------------------- If the value selected is ALL ---------------------- */
-    if (tops_select.value == "ALL") {
-      /* -------------- Sort and map the videos by views - descending ------------- */
-      sorted_videos = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
-      sorted_videos = sorted_videos.slice(0,10).map(function (e) { return mapVideos[e] });
-    }
-
-    /* ------------------ In case of another option was chosen ------------------ */
-    else {
-      const points_dict = {};
-      /* ------------ Get all videos category that match the chosen one ----------- */
-      for (let [key, elem] of Object.entries(mapVideos)) {
-        if (elem.keyword == tops_select.value) {
-          if (!points_dict[key]) {
-            points_dict[key] = elem;
-          }
-        }
-      }
-      /* -------------- Sort and map the videos by views - descending ------------- */
-      sorted_videos = Object.keys(points_dict).sort((a, b) => points_dict[b].views - points_dict[a].views);
-      sorted_videos = sorted_videos.slice(0,10).map(function (e) { return points_dict[e] });
-    }
-
-    /* --------- Remove all contents from tops table and add new content -------- */
-    d3.select("#tops-table-body")
-    .html('')
-    .selectAll("*")
-    .remove(); 
-    createTopsTable(sorted_videos);
+    createTopsTable(10);
     };
 } 
 
