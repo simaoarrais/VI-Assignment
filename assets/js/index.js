@@ -460,7 +460,7 @@ function barPlotCategories() {
   .text("a simple tooltip");
 
   // set the dimensions and margins of the graph
-  const margin = { top: 30, right: 60, bottom: 70, left: 70 },
+  const margin = { top: 30, right: 60, bottom: 70, left: 80 },
     width = 500 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
