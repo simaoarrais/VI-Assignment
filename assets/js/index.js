@@ -87,6 +87,8 @@ async function createTops() {
   /* ------------------------- Create top videos table ------------------------ */
   createTopsOptions();
   createTopsTable(10);
+  pagination();
+  updateTable();
 
   /* --------------------------- Draw the pie chart --------------------------- */
   google.charts.load("current", { packages: ["corechart"] });
@@ -167,6 +169,8 @@ function createTopsOptions() {
   /* ---------------------------- Onclick an option --------------------------- */
   tops_select.onclick = function() { 
     createTopsTable(10);
+    pagination();
+    updateTable();
   };
 } 
 
@@ -176,7 +180,7 @@ function drawPieChart(num) {
   sorted_videos = sortedVideos_Views.slice(0,num).map(function (e) { return mapVideos[e] });
 
   /* ---------- Get all keywords and count the number of appearences ---------- */
-  pie_chart_dict = {};
+  const pie_chart_dict = {};
   for (const video of Object.values(sorted_videos)) {
     if (video.keyword in pie_chart_dict) {
       pie_chart_dict[video.keyword] += 1;
@@ -186,15 +190,19 @@ function drawPieChart(num) {
     }
   }
 
+  /* --------- Sort the dict in order for big values to be neighbours --------- */
+  const sortedPairs = Object.entries(pie_chart_dict).sort((a, b) => a[1] - b[1]);
+  const sortedDict = Object.fromEntries(sortedPairs);
+
   /* ------------------------- Create the data table. ------------------------- */
-  var data = new google.visualization.DataTable();
+  const data = new google.visualization.DataTable();
 
   /* ----------------------- Add first and second column ---------------------- */
   data.addColumn("string", "Keyword");
   data.addColumn("number", "Number of Appearences");
 
   /* ----------------------------- Add table rows ----------------------------- */
-  for (let [keyword, counter] of Object.entries(pie_chart_dict)) {
+  for (let [keyword, counter] of Object.entries(sortedDict)) {
     data.addRow([keyword, counter]);
   }
 
@@ -208,7 +216,7 @@ function drawPieChart(num) {
   };
 
   /* ------------------- Instantiate and draw the pie chart ------------------- */
-  var chart = new google.visualization.PieChart(
+  const chart = new google.visualization.PieChart(
     document.getElementById("pie-chart-div")
   );
   chart.draw(data, options);
@@ -218,6 +226,8 @@ function drawPieChart(num) {
 function topsButtonClicked(button) {
   createTopsTable(button.value);
   drawPieChart(button.value);
+  pagination();
+  updateTable();
 }
 
 
@@ -225,6 +235,76 @@ function addCellToTable(table_row, info) {
   var table_cell = document.createElement("td");
   table_cell.innerText = info;
   table_row.appendChild(table_cell);
+}
+
+const rowsPerPage = 5;
+// Get the table body element
+const tableBody = document.getElementById("tops-table-body");
+// Get the previous and next buttons
+const prevButton = document.getElementById("prev-button-tops-table");
+const nextButton = document.getElementById("next-button-tops-table");
+// Set the initial page number to 1
+let currentPage = 1;
+
+function pagination() {
+
+  // Set the initial page number
+  
+
+  /* ---------- Add event listeners to the previous and next buttons ---------- */
+  prevButton.addEventListener("click", function() {
+    if (currentPage > 1) {
+      // Decrement the page number and update the table
+      currentPage--;
+      updateTable();
+    }
+  });
+  
+  nextButton.addEventListener("click", function() {
+    // Check if the current page is the last page
+    if (currentPage < getLastPage()) {
+      // Increment the page number and update the table
+      currentPage++;
+      updateTable();
+    } else {
+      // Disable the next button if on the last page
+      nextButton.disabled = true;
+    }
+  });
+}
+
+function updateTable() {
+
+  // Get the rows of the table
+  const rows = tableBody.querySelectorAll("tr");
+
+   // Enable the next button if not on the last page
+   if (currentPage < getLastPage()) {
+    nextButton.disabled = false;
+  }
+  else {nextButton.disabled = true;}
+
+  // Calculate the start and end indices for the current page
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+
+  // Loop through the rows and show only the rows within the start and end indices
+  for (let i = 0; i < rows.length; i++) {
+    if (i >= startIndex && i < endIndex) {
+      rows[i].style.display = "table-row";
+    } else {
+      rows[i].style.display = "none";
+    }
+  }
+}
+
+function getLastPage() {
+  
+  // Get the number of rows in the table
+  const rowCount = tableBody.querySelectorAll("tr").length;
+
+  // Calculate the last page number
+  return Math.ceil(rowCount / rowsPerPage);
 }
 
 
