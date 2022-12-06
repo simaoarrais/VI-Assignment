@@ -81,12 +81,13 @@ async function parseData(file) {
   });
 }
 
+var currentTops = 10;
 
 // Build Top Videos Tab
 async function createTops() {
   /* ------------------------- Create top videos table ------------------------ */
   createTopsOptions();
-  createTopsTable(10);
+  createTopsTable(currentTops);
   pagination();
   updateTable();
 
@@ -97,6 +98,8 @@ async function createTops() {
 
 
 function createTopsTable(num) {
+  const topsHeader = document.getElementById("tops-header");
+  topsHeader.innerText = "Videos Trending - Top " + num;
   /* --------- Remove all contents from tops table and add new content -------- */
   d3.select("#tops-table-body")
   .html('')
@@ -149,6 +152,7 @@ function createTopsTable(num) {
 }
 
 
+
 function createTopsOptions() {
   const tops_select = document.getElementById("tops-select");
 
@@ -168,8 +172,8 @@ function createTopsOptions() {
 
   /* ---------------------------- Onclick an option --------------------------- */
   tops_select.onclick = function() { 
-    createTopsTable(10);
-    pagination();
+    createTopsTable(currentTops);
+    currentPage = 1;
     updateTable();
   };
 } 
@@ -224,9 +228,10 @@ function drawPieChart(num) {
 
 
 function topsButtonClicked(button) {
+  currentTops = button.value;
   createTopsTable(button.value);
   drawPieChart(button.value);
-  pagination();
+  currentPage = 1;
   updateTable();
 }
 
@@ -237,14 +242,14 @@ function addCellToTable(table_row, info) {
   table_row.appendChild(table_cell);
 }
 
-const rowsPerPage = 5;
+const rowsPerPage = 10;
 // Get the table body element
 const tableBody = document.getElementById("tops-table-body");
 // Get the previous and next buttons
 const prevButton = document.getElementById("prev-button-tops-table");
 const nextButton = document.getElementById("next-button-tops-table");
 // Set the initial page number to 1
-let currentPage = 1;
+var currentPage = 1;
 
 function pagination() {
 
@@ -440,7 +445,6 @@ function barPlotAllCategories(data){
 
   
 }
-
 
 // Initialize the plot with the first dataset
 
