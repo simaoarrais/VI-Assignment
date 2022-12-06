@@ -175,6 +175,8 @@ function createTopsOptions() {
     createTopsTable(currentTops);
     currentPage = 1;
     updateTable();
+    const tablePage = document.getElementById("tops-table-page");
+    tablePage.innerText = "page " + currentPage + "/" + getLastPage();
   };
 } 
 
@@ -233,6 +235,8 @@ function topsButtonClicked(button) {
   drawPieChart(button.value);
   currentPage = 1;
   updateTable();
+  const tablePage = document.getElementById("tops-table-page");
+  tablePage.innerText = "page " + currentPage + "/" + getLastPage();
 }
 
 
@@ -253,8 +257,7 @@ var currentPage = 1;
 
 function pagination() {
 
-  // Set the initial page number
-  
+  const tablePage = document.getElementById("tops-table-page");
 
   /* ---------- Add event listeners to the previous and next buttons ---------- */
   prevButton.addEventListener("click", function() {
@@ -262,6 +265,7 @@ function pagination() {
       // Decrement the page number and update the table
       currentPage--;
       updateTable();
+      tablePage.innerText = "page " + currentPage + "/" + getLastPage();
     }
   });
   
@@ -271,6 +275,7 @@ function pagination() {
       // Increment the page number and update the table
       currentPage++;
       updateTable();
+      tablePage.innerText = "page " + currentPage + "/" + getLastPage();
     } else {
       // Disable the next button if on the last page
       nextButton.disabled = true;
@@ -279,7 +284,6 @@ function pagination() {
 }
 
 function updateTable() {
-
   // Get the rows of the table
   const rows = tableBody.querySelectorAll("tr");
 
