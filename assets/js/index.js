@@ -14,7 +14,8 @@ let mapCategories_Views = new Map();
 let mapCategories_Likes = new Map();
 let mapCategories_Comments = new Map();
 
-let mapVideos = new Map()
+var sortedVideos_Views;
+var mapVideos = new Map();
 
 class VideoStructure {
   constructor(title, id, published_date, keyword, likes, comments, views) {
@@ -83,18 +84,15 @@ async function parseData(file) {
 
 // Build Top Videos Tab
 async function createTops() {
-  /* -------------- Sort and map the videos by views - descending ------------- */
-  let sorted_videos = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
-  sorted_videos = sorted_videos.slice(0,10).map(function (e) { return mapVideos[e] });
-
   /* ------------------------- Create top videos table ------------------------ */
   createTopsOptions();
   createTopsTable(10);
 
   /* --------------------------- Draw the pie chart --------------------------- */
   google.charts.load("current", { packages: ["corechart"] });
-  google.charts.setOnLoadCallback(function () { drawPieChart(sorted_videos); });
+  google.charts.setOnLoadCallback(function () { drawPieChart(10); });
 }
+
 
 function createTopsTable(num) {
   /* --------- Remove all contents from tops table and add new content -------- */
@@ -108,8 +106,7 @@ function createTopsTable(num) {
     /* ---------------------- If the value selected is ALL ---------------------- */
     if (tops_select.value == "ALL") {
       /* -------------- Sort and map the videos by views - descending ------------- */
-      sorted_videos = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
-      sorted_videos = sorted_videos.slice(0,num).map(function (e) { return mapVideos[e] });
+      sorted_videos = sortedVideos_Views.slice(0,num).map(function (e) { return mapVideos[e] });
     }
     /* ------------------ In case of another option was chosen ------------------ */
     else {
@@ -126,7 +123,6 @@ function createTopsTable(num) {
       sorted_videos = Object.keys(points_dict).sort((a, b) => points_dict[b].views - points_dict[a].views);
       sorted_videos = sorted_videos.slice(0,num).map(function (e) { return points_dict[e] });
     }
-
 
   const tops_table_div = document.getElementById("tops-table-body");
   for (let i = 0; i < num; i++) {
@@ -169,12 +165,15 @@ function createTopsOptions() {
   }
 
   /* ---------------------------- Onclick an option --------------------------- */
-  tops_select.onclick = function() {
+  tops_select.onclick = function() { 
     createTopsTable(10);
-    };
+  };
 } 
 
-function drawPieChart(sorted_videos) {
+
+function drawPieChart(num) {
+  /* -------------- Sort and map the videos by views - descending ------------- */
+  sorted_videos = sortedVideos_Views.slice(0,num).map(function (e) { return mapVideos[e] });
 
   /* ---------- Get all keywords and count the number of appearences ---------- */
   pie_chart_dict = {};
@@ -203,13 +202,22 @@ function drawPieChart(sorted_videos) {
   var options = {
     title: "Category Pie Chart",
     is3D: false,
+    subtitlePosition: 'left',
+    pieHole: 0.4,
+    sliceVisibilityThreshold: 0.05
   };
 
   /* ------------------- Instantiate and draw the pie chart ------------------- */
   var chart = new google.visualization.PieChart(
-    document.getElementById("pie-chart-row")
+    document.getElementById("pie-chart-div")
   );
   chart.draw(data, options);
+}
+
+
+function topsButtonClicked(button) {
+  createTopsTable(button.value);
+  drawPieChart(button.value);
 }
 
 
@@ -558,7 +566,7 @@ function changeOption(option){
 
 // ################################# DATA PROCESSING #################################
 function preparingData() { // Preparing data for the bar plot
-  //Removing irrelevant data
+  sortedVideos_Views = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
   
   dataViews = Array.from(mapCategories_Views, ([name, value]) => ({
     name,
@@ -590,8 +598,8 @@ function getWordCount(words) {
 // Init
 async function init() {
   await parseData(file_path);
-  createTops();
   preparingData();
+  createTops();
   addOptionsDropdown(videos_keyword_unique);
   barPlotCategories();
   wordCloud();
