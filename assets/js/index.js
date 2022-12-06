@@ -152,7 +152,6 @@ function createTopsTable(num) {
 }
 
 
-
 function createTopsOptions() {
   const tops_select = document.getElementById("tops-select");
 
@@ -365,8 +364,9 @@ function barPlotAllCategories(data){
     data =  dataViews.filter (function (d) {  return d.value > 90000000});
     
   } else if (data == "likes") {
-    data =  dataLikes.filter (function (d) {  return d.value > 2905600; })
+    data =  dataLikes.filter (function (d) {  return d.value > 2905600; });
   }
+  data.sort(function (a, b) { return b.value - a.value; });
 
   const tooltip = d3.select("body")
   .append("div")
