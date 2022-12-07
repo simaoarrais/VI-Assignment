@@ -402,9 +402,11 @@ function barPlotAllCategories(data){
     .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`)
         .on("mouseover", function(d, i) {
-          tooltip.html(` ${d.target.__data__.value}`).style("visibility", "visible");
-          d3.select(this)
-            .attr("fill", "#0047aa");
+          if (!Number.isInteger(d.target.__data__) && typeof d.target.__data__ != "string") {
+            tooltip.html(` ${d.target.__data__.value}`).style("visibility", "visible");
+            d3.select(this)
+              .attr("fill", "#0047aa");
+          }
         })
         .on("mouseout", function(d, i) {
           tooltip.html(` ${d.target.__data__.value}`).style("visibility", "hidden");
@@ -490,12 +492,11 @@ function barPlotCategories() {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`)
     .on("mouseover", function(d, i) {
-      console.log("hahahah")
-      tooltip.html(` ${d.target.__data__[1]}`).style("visibility", "visible");
-
+      if (!Number.isInteger(d.target.__data__) && typeof d.target.__data__ != "string") {
+        tooltip.html(` ${d.target.__data__[1]}`).style("visibility", "visible");
+      }
     })
     .on("mousemove", function(){
-      console.log("hahahah")
       tooltip
         .style("top", (event.pageY-10)+"px")
         .style("left",(event.pageX+10)+"px");
