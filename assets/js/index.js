@@ -405,10 +405,7 @@ function barPlotAllCategories(data){
             .style("top", (event.pageY-10)+"px")
             .style("left",(event.pageX+10)+"px");
         })
-        .on("mouseout", function() {
-          tooltip.html(``).style("visibility", "hidden");
-          d3.select(this).attr("fill", bar_color);
-        });
+     ;
 
 
   // Initialize the X axis
@@ -485,10 +482,12 @@ function barPlotCategories() {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`)
     .on("mouseover", function(d, i) {
-      tooltip.html(` ${d.target.__data__.name}`).style("visibility", "visible");
+      console.log("hahahah")
+      tooltip.html(` ${d.target.__data__[1]}`).style("visibility", "visible");
 
     })
     .on("mousemove", function(){
+      console.log("hahahah")
       tooltip
         .style("top", (event.pageY-10)+"px")
         .style("left",(event.pageX+10)+"px");
