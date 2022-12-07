@@ -1,21 +1,21 @@
 // Inititalize all variables
 const file_path = "assets/data/videos-stats.csv";
-var videos_file_entry = new Array();
-var videos_title = new Array();
-var videos_id = new Array();
-var videos_published = new Array();
-var videos_keyword = new Array();
-var videos_keyword_unique = [...new Set(videos_keyword)];
-var videos_likes = new Array();
-var videos_comments = new Array();
-var videos_views = new Array();
+let videos_file_entry = new Array();
+let videos_title = new Array();
+let videos_id = new Array();
+let videos_published = new Array();
+let videos_keyword = new Array();
+let videos_keyword_unique = [...new Set(videos_keyword)];
+let videos_likes = new Array();
+let videos_comments = new Array();
+let videos_views = new Array();
 
 let mapCategories_Views = new Map();
 let mapCategories_Likes = new Map();
 let mapCategories_Comments = new Map();
 
-var sortedVideos_Views;
-var mapVideos = new Map();
+let sortedVideos_Views;
+let mapVideos = new Map();
 
 class VideoStructure {
   constructor(title, id, published_date, keyword, likes, comments, views) {
@@ -81,7 +81,7 @@ async function parseData(file) {
   });
 }
 
-var currentTops = 10;
+let currentTops = 10;
 
 // Build Top Videos Tab
 async function createTops() {
@@ -218,7 +218,7 @@ function drawPieChart(num) {
   }
 
   /* --------------------- Set chart configuration options -------------------- */
-  var options = {
+  let options = {
     title: "Top " + currentTops + " Categories - Pie Chart",
     is3D: false,
     subtitlePosition: 'left',
@@ -246,7 +246,7 @@ function topsButtonClicked(button) {
 
 
 function addCellToTable(table_row, info) {
-  var table_cell = document.createElement("td");
+  let table_cell = document.createElement("td");
   table_cell.innerText = info;
   table_row.appendChild(table_cell);
 }
@@ -258,7 +258,7 @@ const tableBody = document.getElementById("tops-table-body");
 const prevButton = document.getElementById("prev-button-tops-table");
 const nextButton = document.getElementById("next-button-tops-table");
 // Set the initial page number to 1
-var currentPage = 1;
+let currentPage = 1;
 
 function pagination() {
 
@@ -323,31 +323,31 @@ function getLastPage() {
 
 
 function redirectingFromTableToYoutube() {
-  var table = document.getElementById("tops-table-body");
-  var rows = table.getElementsByTagName("tr");
+  // Get the table body element
+  let table = document.getElementById("tops-table-body");
+  let rows = table.getElementsByTagName("tr");
 
- 
+  // Loop through the rows and add event listeners to each row
   for (i = 0; i < rows.length; i++) {
 
-    var currentRow = table.rows[i];
-
-    var createOverHandler = function (row) {
+    let currentRow = table.rows[i];
+    let createOverHandler = function (row) { 
       return function () {
-        row.style.color = "#FF2F5F";
+        row.style.color = "#FF2F5F"; // change color on mouseover to red, so that user can see that he can click on the row to go to the video
         row.style.cursor = "pointer";
          };
     };
 
-    var createOutHandler = function (row) {
+    let createOutHandler = function (row) {
       return function () {
         row.style.color = 'black';
          };
     };
 
-    var createClickHandler = function(row) {
+    let createClickHandler = function(row) {
       return function() {
-        var cell = row.getElementsByTagName("td")[0];
-        var video_title = cell.innerHTML;
+        let cell = row.getElementsByTagName("td")[0];
+        let video_title = cell.innerHTML;
         video_id = videos_id[videos_title.indexOf(video_title)];
         window.open('https://www.youtube.com/watch?v=' + video_id);
       };
@@ -362,13 +362,16 @@ function redirectingFromTableToYoutube() {
 }
 
 
-///////////// BAR CHART  all categories //////////////
+// ----------------------- BAR CHART  ALL CATEGORIES -----------------------
+
 function barPlotAllCategories(data){
+  //If there is already a bar plot, remove it before drawing a new one
   const div = document.getElementById('divAllCategories');
   if (div.childNodes.length !== 0) {
     div.removeChild(div.childNodes[0]);
   }
 
+  //The user choose which data wants to see
   if (data == "views") {
     data =  dataViews.filter (function (d) {  return d.value > 90000000});
     
@@ -377,7 +380,8 @@ function barPlotAllCategories(data){
   }
   data.sort(function (a, b) { return b.value - a.value; });
 
-  const tooltip = d3.select("body")
+  // Get the values of the selected data in the graph
+  const tooltip = d3.select("body") // Code from https://d3-graph-gallery.com/graph/interactivity_tooltip.html#template
   .append("div")
   .attr("class","d3-tooltip")
   .style("position", "absolute")
@@ -389,12 +393,12 @@ function barPlotAllCategories(data){
   .style("color", "#fff")
   .text("a simple tooltip");
 
-  // set the dimensions and margins of the graph
+  // set the dimensions and margins of the graph  
   const margin = {top: 30, right: 30, bottom: 70, left: 80},
       width = 1280 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
-  // append the svg object to the body of the page
+  // append the svg object to the body of the page, code from https://d3-graph-gallery.com/graph/barplot_animation_start.html 
   const svg = d3.select("#divAllCategories")
     .append("svg")
       .attr("width", width + margin.left + margin.right)
@@ -444,7 +448,7 @@ function barPlotAllCategories(data){
     yAxis.transition().duration(1000).call(d3.axisLeft(y));
 
     // Create the u variable
-    var u = svg.selectAll("rect")
+    let u = svg.selectAll("rect")
       .data(data)
 
     u.join("rect") // Add a new rect for each new elements
@@ -455,17 +459,15 @@ function barPlotAllCategories(data){
         .attr("width", x.bandwidth())
         .attr("height", d => height - y(d.value))
         .attr("fill", "#0B5ED7")
-
-
-  
 }
 
-// Initialize the plot with the first dataset
+// ----------------------- BAR CHART  CATEGORIES -----------------------
 
-// Build the Bar Chart
 function barPlotCategories() {
 
-  const tooltip = d3.select("body")
+  // Get the values of the selected data in the graph
+
+  const tooltip = d3.select("body") // Code from https://d3-graph-gallery.com/graph/interactivity_tooltip.html#template
   .append("div")
   .attr("class","d3-tooltip")
   .style("position", "absolute")
@@ -483,7 +485,8 @@ function barPlotCategories() {
     height = 400 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
-  var svg = d3
+  // original code from https://d3-graph-gallery.com/graph/barplot_button_data_simple.html 
+  let svg = d3
     .select("#barPlotCategories")
     .append("svg")
     .attr("id", "barPlotCategoriesSVG")
@@ -505,12 +508,12 @@ function barPlotCategories() {
       tooltip.html(``).style("visibility", "hidden");
     });
 
-  var selectedCategory = document.getElementById("mySelect").value;
+  let selectedCategory = document.getElementById("mySelect").value;
 
   data_views = mapCategories_Views.get(selectedCategory);
   data_likes = mapCategories_Likes.get(selectedCategory);
 
-  var data = [["Views", data_views],["Likes", data_likes],];
+  let data = [["Views", data_views],["Likes", data_likes],];
 
   max_value = Math.max(data_views, data_likes);
 
@@ -556,26 +559,24 @@ function barPlotCategories() {
 // Adding categories to the dropdown menu
 function addOptionsDropdown(options) {
 
-  
-  var myDiv = document.getElementById("divCategories");
+  let myDiv = document.getElementById("divCategories");
 
-  //Create array of options to be added
-  //Create and append select list
-  var selectList = document.createElement("select");
+  //Create and append form-select to div
+  let selectList = document.createElement("select");
   selectList.setAttribute("id", "mySelect");
   selectList.classList.add("form-select");
-
   myDiv.appendChild(selectList);
 
-  for (var i = 0; i < options.length; i++) {
-    var option = document.createElement("option");
+  //Create and append the options
+  for (let i = 0; i < options.length; i++) {
+    let option = document.createElement("option");
     option.setAttribute("value", options[i]);
     option.text = options[i];
     selectList.appendChild(option);
   }
 
-  var categories_list = document.getElementById("mySelect");
-
+  // Adding event listener to the dropdown menu
+  let categories_list = document.getElementById("mySelect");
   categories_list.addEventListener("click", function () {
     d3.select("#barPlotCategoriesSVG").remove();
     barPlotCategories();
@@ -584,32 +585,34 @@ function addOptionsDropdown(options) {
 
 
 function wordCloud() {
+  //getting the words to build the word cloud
   myWords = getWordCount(videos_keyword);
 
   // set the dimensions and margins of the graph
-  var margin = { top: 10, right: 10, bottom: 10, left: 10 },
+  let margin = { top: 10, right: 10, bottom: 10, left: 10 },
     width = 1300 - margin.left - margin.right,
     height = 250 - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
-  var svg = d3
+  let svg = d3
     .select("#my_dataviz")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
   // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
   // Wordcloud features that are different from one word to the other must be here
-  var layout = d3.layout
+  // Original code from: https://d3-graph-gallery.com/graph/wordcloud_size.html 
+
+  let layout = d3.layout
     .cloud()
     .size([width, height])
     .words(
       myWords.map(function (d) {
         return { text: d.word, size: d.size };
-      })
-    )
-    
+      }))
     .padding(5) //space between words
     .rotate(function () {
       return ~~(Math.random() * 2) * 90;
@@ -622,6 +625,7 @@ function wordCloud() {
 
   // This function takes the output of 'layout' above and draw the words
   // Wordcloud features that are THE SAME from one word to the other can be here
+  // This code was also taken from: https://d3-graph-gallery.com/graph/wordcloud_size.html
   function draw(words) {
 
     svg
@@ -636,14 +640,14 @@ function wordCloud() {
       .append("text")
       .style("font-size", function (d) {return d.size;})
       .style("fill", "#01A5EE")
-      .style("cursor", "pointer")
+      .style("cursor", "pointer") //changing the cursor to a pointer when hovering over the word to indicate to the user that he is able to click on it
       .on("mouseover", function () {
         d3.select(this)
-          .style("fill", "#0040FF");
+          .style("fill", "#0040FF"); //changing the color of the word when hovering over it
         })
       .on("mouseout", function () {
           d3.select(this)
-            .style("fill", "#01A5EE");
+            .style("fill", "#01A5EE"); 
           })
       .attr("text-anchor", "middle")
       .style("font-family", "trebuchet MS")
@@ -651,7 +655,7 @@ function wordCloud() {
         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";})
       .text(function(d) { return d.text; })
       .on("click", function (d){
-        chosen_category = d["target"]["__data__"]["text"];
+        chosen_category = d["target"]["__data__"]["text"]; //getting the category name in the cloud clicked
         changeOption(chosen_category);
 
       })
@@ -664,8 +668,8 @@ function wordCloud() {
 }
 
 
-function changeOption(option){
-  var select = document.getElementById("mySelect");
+function changeOption(option){ // Changing the option in the dropdown menu to change the information in the bar plot
+  let select = document.getElementById("mySelect");
   select.value = option;
   d3.select("#barPlotCategoriesSVG").remove();
   barPlotCategories();
@@ -673,7 +677,8 @@ function changeOption(option){
 }
 
 
-// ################################# DATA PROCESSING #################################
+// -----------------------  DATA PROCESSING -----------------------
+
 function preparingData() { // Preparing data for the bar plot
   sortedVideos_Views = Object.keys(mapVideos).sort((a, b) => mapVideos[b].views - mapVideos[a].views);
   
@@ -689,12 +694,12 @@ function preparingData() { // Preparing data for the bar plot
 }
 
 
-// Getting word count of categories
+// Getting word counts of categories
 function getWordCount(words) {
   let map = new Map();
-  for (let i = 0; i < words.length; i++) {
+  for (let i = 0; i < words.length; i++) { 
     let item = words[i];
-    if (map.has(item)) {
+    if (map.has(item)) { //building a map with the categories as keys and the number of times they appear as values
       map.set(item, map.get(item) + 1);
     } else {
       map.set(item, 1);
@@ -705,7 +710,7 @@ function getWordCount(words) {
 }
 
 // Init
-async function init() {
+async function init() { // Initializing the page with the data
   await parseData(file_path);
   preparingData();
   createTops();
