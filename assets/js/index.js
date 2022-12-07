@@ -213,7 +213,7 @@ function drawPieChart(num) {
 
   /* --------------------- Set chart configuration options -------------------- */
   var options = {
-    title: "Category Pie Chart",
+    title: "Trending Categories - Pie Chart",
     is3D: false,
     subtitlePosition: 'left',
     pieHole: 0.4,
@@ -327,12 +327,15 @@ function redirectingFromTableToYoutube() {
 
     var createOverHandler = function (row) {
       return function () {
-        row.style.color = "#FF2F5F";   };
+        row.style.color = "#FF2F5F";
+        row.style.cursor = "pointer";
+         };
     };
 
     var createOutHandler = function (row) {
       return function () {
-        row.style.color = 'black';   };
+        row.style.color = 'black';
+         };
     };
 
     var createClickHandler = function(row) {
@@ -612,6 +615,7 @@ function wordCloud() {
   // This function takes the output of 'layout' above and draw the words
   // Wordcloud features that are THE SAME from one word to the other can be here
   function draw(words) {
+
     svg
       .append("g")
       .attr(
@@ -624,6 +628,15 @@ function wordCloud() {
       .append("text")
       .style("font-size", function (d) {return d.size;})
       .style("fill", "#01A5EE")
+      .style("cursor", "pointer")
+      .on("mouseover", function () {
+        d3.select(this)
+          .style("fill", "#FF2F5F");
+        })
+      .on("mouseout", function () {
+          d3.select(this)
+            .style("fill", "#01A5EE");
+          })
       .attr("text-anchor", "middle")
       .style("font-family", "trebuchet MS")
       .attr("transform", function (d) {
@@ -633,7 +646,7 @@ function wordCloud() {
         chosen_category = d["target"]["__data__"]["text"];
         changeOption(chosen_category);
 
-    })
+      })
       .text(function (d) {
         return d.text;
       });
