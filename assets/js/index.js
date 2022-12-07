@@ -157,9 +157,15 @@ function createTopsOptions() {
 
   /* ---------------------------- Create ALL option --------------------------- */
   let option = document.createElement("option");
-  option.text = "ALL";
+  option.text = "Categories - ALL";
   option.value = "ALL";
   tops_select.appendChild(option);
+
+  let input = document.createElement("input");
+  input.placeholder = "Search options";
+  input.type = "text";
+  input.id = "search-input";
+  tops_select.appendChild(input);
 
   /* ---------------------- Create the remaining options ---------------------- */
   for (let keyword of videos_keyword_unique.sort()) {
@@ -213,7 +219,7 @@ function drawPieChart(num) {
 
   /* --------------------- Set chart configuration options -------------------- */
   var options = {
-    title: "Trending Categories - Pie Chart",
+    title: "Top " + currentTops + " Categories - Pie Chart",
     is3D: false,
     subtitlePosition: 'left',
     pieHole: 0.4,
@@ -400,6 +406,9 @@ function barPlotAllCategories(data){
           d3.select(this)
             .attr("fill", "#0047aa");
         })
+        .on("mouseout", function(d, i) {
+          tooltip.html(` ${d.target.__data__.value}`).style("visibility", "hidden");
+        })
         .on("mousemove", function(){
           tooltip
             .style("top", (event.pageY-10)+"px")
@@ -436,8 +445,7 @@ function barPlotAllCategories(data){
     var u = svg.selectAll("rect")
       .data(data)
 
-    u
-      .join("rect") // Add a new rect for each new elements
+    u.join("rect") // Add a new rect for each new elements
       .transition()
       .duration(1000)
         .attr("x", d => x(d.name))
@@ -630,7 +638,7 @@ function wordCloud() {
       .style("cursor", "pointer")
       .on("mouseover", function () {
         d3.select(this)
-          .style("fill", "#FF2F5F");
+          .style("fill", "#0040FF");
         })
       .on("mouseout", function () {
           d3.select(this)
