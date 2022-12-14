@@ -86,9 +86,10 @@ async function parseData(file) {
 /* -------------------------------------------------------------------------- */
 let currentTops = 10;
 async function createTops() {
-  ``` 
+  /* 
   On load builder for the top trending videos page
-  ``` 
+  */
+  
   /* ------------------------- Create top videos table ------------------------ */
   createTopsOptions();
   createTopsTable(currentTops);
@@ -102,9 +103,9 @@ async function createTops() {
 
 
 function createTopsTable(num) {
-  ``` 
+  /* 
   Creates the Top Videos Table based on current top choice
-  ``` 
+  P*/ 
 
   const topsHeader = document.getElementById("tops-header");
   topsHeader.innerText = "Videos Trending - Top " + num;
@@ -163,9 +164,9 @@ function createTopsTable(num) {
 
 
 function createTopsOptions() {
-  ``` 
+  /* 
   Builds and displays the dropdown with all the categories for the tops page
-  ```
+  */
   const tops_select = document.getElementById("tops-select");
 
   /* ---------------------------- Create ALL option --------------------------- */
@@ -200,9 +201,9 @@ function createTopsOptions() {
 
 
 function drawPieChart(num) {
-  ``` 
+  /* 
   Builds and displays the Google Pie Chart
-  ```
+  */
 
   /* -------------- Sort and map the videos by views - descending ------------- */
   sorted_videos = sortedVideos_Views.slice(0,num).map(function (e) { return mapVideos[e] });
@@ -252,9 +253,9 @@ function drawPieChart(num) {
 
 
 function topsButtonClicked(button) {
-  ``` 
+  /* 
   Function called when the top 10 or top 25 buttons have been clicked.
-  ```
+  */
 
   /* -------- Sets the value of current tops and re-displays everything ------- */
   currentTops = button.value;
@@ -270,9 +271,10 @@ function topsButtonClicked(button) {
 
 
 function addCellToTable(table_row, info) {
-  ``` 
+  /* 
   Function used to facilitate logic of adding videos to the tops table
-  ```
+  */
+
   let table_cell = document.createElement("td");
   table_cell.innerText = info;
   table_row.appendChild(table_cell);
@@ -280,9 +282,9 @@ function addCellToTable(table_row, info) {
 
 
 function redirectingFromTableToYoutube() {
-  ``` 
+  /* 
   Assigns an hyperlink to each row of the tops table
-  ```
+  */
 
   // Get the table body element
   let table = document.getElementById("tops-table-body");
@@ -339,9 +341,9 @@ const nextButton = document.getElementById("next-button-tops-table");
 let currentPage = 1;
 
 function pagination() {
-  ``` 
+  /* 
   Paginates the results from the tops table according to a certain number of rows per page
-  ```
+  */
   
   const tablePage = document.getElementById("tops-table-page");
 
@@ -371,9 +373,9 @@ function pagination() {
 
 
 function updateTable() {
-  ``` 
+  /* 
   Updates the table on any event related to the tops page
-  ```
+  */
 
   // Get the rows of the table
   const rows = tableBody.querySelectorAll("tr");
@@ -400,9 +402,9 @@ function updateTable() {
 
 
 function getLastPage() {
-  ``` 
+  /* 
   Calculates the maximum number of pages that the tops table will have
-  ```
+  */
   // Get the number of rows in the table
   const rowCount = tableBody.querySelectorAll("tr").length;
 
@@ -634,9 +636,9 @@ function addOptionsDropdown(options) {
 
 
 function wordCloud() {
-  ``` 
+  /*
   Builds and displays the word cloud
-  ```
+  */
 
   //getting the words to build the word cloud
   myWords = getWordCount(videos_keyword);
