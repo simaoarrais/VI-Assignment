@@ -9,12 +9,12 @@ let videos_keyword_unique = [...new Set(videos_keyword)];
 let videos_likes = new Array();
 let videos_comments = new Array();
 let videos_views = new Array();
+let sortedVideos_Views;
 
 let mapCategories_Views = new Map();
 let mapCategories_Likes = new Map();
 let mapCategories_Comments = new Map();
 
-let sortedVideos_Views;
 let mapVideos = new Map();
 
 class VideoStructure {
@@ -29,7 +29,7 @@ class VideoStructure {
   }
 }
 
-// Iterate through the CSV file and save data
+/* --------------- Iterate through the CSV file and save data --------------- */
 async function parseData(file) {
   await d3.csv(file, function (data) {
     videos_file_entry.push(data[""]);
@@ -81,10 +81,14 @@ async function parseData(file) {
   });
 }
 
+/* -------------------------------------------------------------------------- */
+/*               Logic belonging to the top videos trending page              */
+/* -------------------------------------------------------------------------- */
 let currentTops = 10;
-
-// Build Top Videos Tab
 async function createTops() {
+  ``` 
+  On load builder for the top trending videos page
+  ``` 
   /* ------------------------- Create top videos table ------------------------ */
   createTopsOptions();
   createTopsTable(currentTops);
@@ -98,17 +102,21 @@ async function createTops() {
 
 
 function createTopsTable(num) {
+  ``` 
+  Creates the Top Videos Table based on current top choice
+  ``` 
+
   const topsHeader = document.getElementById("tops-header");
   topsHeader.innerText = "Videos Trending - Top " + num;
   /* --------- Remove all contents from tops table and add new content -------- */
   d3.select("#tops-table-body")
-  .html('')
-  .selectAll("*")
-  .remove(); 
+    .html('')
+    .selectAll("*")
+      .remove(); 
 
   const tops_select = document.getElementById("tops-select");
   let sorted_videos;
-    /* ---------------------- If the value selected is ALL ---------------------- */
+    /* ---------------------- If the option selected is ALL ---------------------- */
     if (tops_select.value == "ALL") {
       /* -------------- Sort and map the videos by views - descending ------------- */
       sorted_videos = sortedVideos_Views.slice(0,num).map(function (e) { return mapVideos[e] });
@@ -148,11 +156,16 @@ function createTopsTable(num) {
     addCellToTable(table_row, video.comments); // Comments
     addCellToTable(table_row, video.published_date); // Date
   };
+
+  /* ---------------------- Aplly hyperlink to table rows --------------------- */
   redirectingFromTableToYoutube();
 }
 
 
 function createTopsOptions() {
+  ``` 
+  Builds and displays the dropdown with all the categories for the tops page
+  ```
   const tops_select = document.getElementById("tops-select");
 
   /* ---------------------------- Create ALL option --------------------------- */
@@ -187,6 +200,10 @@ function createTopsOptions() {
 
 
 function drawPieChart(num) {
+  ``` 
+  Builds and displays the Google Pie Chart
+  ```
+
   /* -------------- Sort and map the videos by views - descending ------------- */
   sorted_videos = sortedVideos_Views.slice(0,num).map(function (e) { return mapVideos[e] });
 
@@ -235,9 +252,16 @@ function drawPieChart(num) {
 
 
 function topsButtonClicked(button) {
+  ``` 
+  Function called when the top 10 or top 25 buttons have been clicked.
+  ```
+
+  /* -------- Sets the value of current tops and re-displays everything ------- */
   currentTops = button.value;
   createTopsTable(button.value);
   drawPieChart(button.value);
+
+  /* -------------------------- Resets the pagination ------------------------- */
   currentPage = 1;
   updateTable();
   const tablePage = document.getElementById("tops-table-page");
@@ -246,83 +270,20 @@ function topsButtonClicked(button) {
 
 
 function addCellToTable(table_row, info) {
+  ``` 
+  Function used to facilitate logic of adding videos to the tops table
+  ```
   let table_cell = document.createElement("td");
   table_cell.innerText = info;
   table_row.appendChild(table_cell);
 }
 
-const rowsPerPage = 10;
-// Get the table body element
-const tableBody = document.getElementById("tops-table-body");
-// Get the previous and next buttons
-const prevButton = document.getElementById("prev-button-tops-table");
-const nextButton = document.getElementById("next-button-tops-table");
-// Set the initial page number to 1
-let currentPage = 1;
-
-function pagination() {
-
-  const tablePage = document.getElementById("tops-table-page");
-
-  /* ---------- Add event listeners to the previous and next buttons ---------- */
-  prevButton.addEventListener("click", function() {
-    if (currentPage > 1) {
-      // Decrement the page number and update the table
-      currentPage--;
-      updateTable();
-      tablePage.innerText = "page " + currentPage + "/" + getLastPage();
-    }
-  });
-  
-  nextButton.addEventListener("click", function() {
-    // Check if the current page is the last page
-    if (currentPage < getLastPage()) {
-      // Increment the page number and update the table
-      currentPage++;
-      updateTable();
-      tablePage.innerText = "page " + currentPage + "/" + getLastPage();
-    } else {
-      // Disable the next button if on the last page
-      nextButton.disabled = true;
-    }
-  });
-}
-
-function updateTable() {
-  // Get the rows of the table
-  const rows = tableBody.querySelectorAll("tr");
-
-   // Enable the next button if not on the last page
-   if (currentPage < getLastPage()) {
-    nextButton.disabled = false;
-  }
-  else {nextButton.disabled = true;}
-
-  // Calculate the start and end indices for the current page
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-
-  // Loop through the rows and show only the rows within the start and end indices
-  for (let i = 0; i < rows.length; i++) {
-    if (i >= startIndex && i < endIndex) {
-      rows[i].style.display = "table-row";
-    } else {
-      rows[i].style.display = "none";
-    }
-  }
-}
-
-function getLastPage() {
-  
-  // Get the number of rows in the table
-  const rowCount = tableBody.querySelectorAll("tr").length;
-
-  // Calculate the last page number
-  return Math.ceil(rowCount / rowsPerPage);
-}
-
 
 function redirectingFromTableToYoutube() {
+  ``` 
+  Assigns an hyperlink to each row of the tops table
+  ```
+
   // Get the table body element
   let table = document.getElementById("tops-table-body");
   let rows = table.getElementsByTagName("tr");
@@ -359,6 +320,94 @@ function redirectingFromTableToYoutube() {
 
   }
   
+}
+
+
+/* -------------------------------------------------------------------------- */
+/*      Logic belonging to the pagination of the top videos trending page     */
+/* -------------------------------------------------------------------------- */
+const rowsPerPage = 10;
+
+// Get the table body element
+const tableBody = document.getElementById("tops-table-body");
+
+// Get the previous and next buttons
+const prevButton = document.getElementById("prev-button-tops-table");
+const nextButton = document.getElementById("next-button-tops-table");
+
+// Set the initial page number to 1
+let currentPage = 1;
+
+function pagination() {
+  ``` 
+  Paginates the results from the tops table according to a certain number of rows per page
+  ```
+  
+  const tablePage = document.getElementById("tops-table-page");
+
+  /* ---------- Add event listeners to the previous and next buttons ---------- */
+  prevButton.addEventListener("click", function() {
+    if (currentPage > 1) {
+      // Decrement the page number and update the table
+      currentPage--;
+      updateTable();
+      tablePage.innerText = "page " + currentPage + "/" + getLastPage();
+    }
+  });
+  
+  nextButton.addEventListener("click", function() {
+    // Check if the current page is the last page
+    if (currentPage < getLastPage()) {
+      // Increment the page number and update the table
+      currentPage++;
+      updateTable();
+      tablePage.innerText = "page " + currentPage + "/" + getLastPage();
+    } else {
+      // Disable the next button if on the last page
+      nextButton.disabled = true;
+    }
+  });
+}
+
+
+function updateTable() {
+  ``` 
+  Updates the table on any event related to the tops page
+  ```
+
+  // Get the rows of the table
+  const rows = tableBody.querySelectorAll("tr");
+
+   // Enable the next button if not on the last page
+   if (currentPage < getLastPage()) {
+    nextButton.disabled = false;
+  }
+  else {nextButton.disabled = true;}
+
+  // Calculate the start and end indices for the current page
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+
+  // Loop through the rows and show only the rows within the start and end indices
+  for (let i = 0; i < rows.length; i++) {
+    if (i >= startIndex && i < endIndex) {
+      rows[i].style.display = "table-row";
+    } else {
+      rows[i].style.display = "none";
+    }
+  }
+}
+
+
+function getLastPage() {
+  ``` 
+  Calculates the maximum number of pages that the tops table will have
+  ```
+  // Get the number of rows in the table
+  const rowCount = tableBody.querySelectorAll("tr").length;
+
+  // Calculate the last page number
+  return Math.ceil(rowCount / rowsPerPage);
 }
 
 
@@ -585,6 +634,10 @@ function addOptionsDropdown(options) {
 
 
 function wordCloud() {
+  ``` 
+  Builds and displays the word cloud
+  ```
+
   //getting the words to build the word cloud
   myWords = getWordCount(videos_keyword);
 
